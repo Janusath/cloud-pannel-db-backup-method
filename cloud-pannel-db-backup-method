@@ -225,6 +225,14 @@ How to backup the database from clodpannel
 
 
 
+* last work is you have to run the script.php file using putty 
+   eg:  php script.php
+* after run this "php script.php" command this token.json file will automaticly create in your backups folder-> databases-> token.json 
+
+
+                 //everthing is finished successfully
+
+
 
         
 
