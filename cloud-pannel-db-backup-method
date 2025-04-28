@@ -1,1 +1,65 @@
-hhjhjhj
+How to backup the database from clodpannel 
+
+
+//------------------------------------------------------------------------------------------------
+
+1 first method backup the database file into clodepannel server only
+
+
+
+1. first you need to create the cron jobs
+    eg:  /usr/bin/php8.3 /home/billshop-test/htdocs/test.billshop.lk/public/script.php
+
+   * you have to create the script.php in your htdocs-> public folder -> create script.php
+
+   use this below code:  
+
+
+      <?php
+        // Database connection details
+        $host   = 'test.billshop.lk';           // 'test.billshop.lk' or 'localhost'
+        $user   = 'testerp';  //your db user name
+        $pass   = 'LUj2HfTIrGhaJzRSz1Ge'; //your db password
+        $dbname = 'testerp';  // db name
+        
+        // Backup directory path
+        $backupDir  = '/home/testerp/backups/databases/testerp';  // this is your path and you can find this path in putty using pwd
+        
+        // Ensure the directory exists, if not create it
+        if (!is_dir($backupDir)) {
+            mkdir($backupDir, 0755, true);
+        }
+        
+        // Backup file name with timestamp
+        $timestamp  = date('Y-m-d_H-i-s');
+        $backupFile = $backupDir . '/backup_' . $timestamp . '.sql';
+        
+        // Create the mysqldump command
+        $command = "mysqldump -h $host -u $user -p$pass $dbname > $backupFile";
+        
+        // Execute the backup command
+        exec($command, $output, $status);
+        
+        // Log the result
+        file_put_contents($backupDir . '/backup_log.txt', 
+            date('Y-m-d H:i:s') . " – status: $status – file: $backupFile\n", FILE_APPEND);
+        
+        if ($status === 0) {
+            echo "Backup saved to $backupFile";
+        } else {
+            echo "Backup failed with status $status";
+        }
+    ?>
+
+  * in File  Manager ->go to backups folder-> databases-> here your db file will store.
+
+
+//--------------------------------------------------------------------------------------------------------------
+    
+
+2 first method backup the database file into clodepannel server and google drive
+
+  
+
+
+
