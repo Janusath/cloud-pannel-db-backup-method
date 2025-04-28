@@ -61,6 +61,172 @@ How to backup the database from clodpannel
 
      * you have to change the permission of backups folder->databases->database name   0750 to 07770
 
+
+        Step 1: Creating a Project in Google API Console
+
+           * Go to the Google Developers Console.  // search your browser
+ 
+           * Click on the "Create Project" button.
+            
+           * Give your project a name and click "Create".
+            
+           * Then go to "APIs & Services" section.
+            
+           * Open "Library".
+            
+           * Search for "Google Drive API" and click "Enable".
+
+        Step 2: Creating OAuth 2.0 Credentials
+
+
+           * Go to "APIs & Services" → "Credentials".
+            
+           * Click "Create Credentials".
+            
+           * Select "OAuth 2.0 Client ID".
+            
+           * Choose "Web Application" as the application type.
+            
+           * In the "Authorized redirect URIs", you can add a URI like:
+            
+               1 http://localhost
+            
+               2 or urn:ietf:wg:oauth:2.0:oob (for simple console-based apps)
+            
+           * After completing this, download the credentials.json file.
+
+
+        Step 3: Install Google API Client Library using Composer
+
+            composer require google/apiclient:^2.0  //install the command in your putty terminal
+
+        Step 4: write the php code and past in your script.php file // you can find this file in your project public folder
+
+
+        <?php 
+                require __DIR__ . '/../vendor/autoload.php'; // Google Client Library
+                
+                
+                // Database connection details
+                $host   = 'test.billshop.lk';           // 'test.billshop.lk' or 'localhost'
+                $user   = 'testerp';
+                $pass   = 'LUj2HfTIrGhaJzRSz1Ge';
+                $dbname = 'testerp';
+                
+                // Backup directory path
+                $backupDir  = '/home/testerp/backups/databases/testerp';
+                
+                // Ensure the directory exists, if not create it
+                if (!is_dir($backupDir)) {
+                    mkdir($backupDir, 0755, true);
+                }
+                
+                // Backup file name with timestamp
+                $timestamp  = date('Y-m-d_H-i-s');
+                $backupFile = $backupDir . '/backup_' . $timestamp . '.sql';
+                
+                // Create the mysqldump command
+                $command = "mysqldump -h $host -u $user -p$pass $dbname > $backupFile";
+                
+                // Execute the backup command
+                exec($command, $output, $status);
+                
+                // Log the result
+                file_put_contents($backupDir . '/backup_log.txt', 
+                    date('Y-m-d H:i:s') . " – status: $status – file: $backupFile\n", FILE_APPEND);
+                
+                if ($status === 0) {
+                    echo "Backup saved to $backupFile\n";
+                } else {
+                    echo "Backup failed with status $status\n";
+                    exit;
+                }
+                
+                // Google Drive Upload Process
+                $client = new Google_Client();
+                $client->setAuthConfig('/home/testerp/backups/databases/credentials.json'); // path to your credentials.json
+                $client->addScope(Google_Service_Drive::DRIVE_FILE);
+                
+                $tokenPath = '/home/testerp/backups/databases/token.json';
+                
+                // Check if token already exists
+                if (file_exists($tokenPath)) {
+                    $accessToken = json_decode(file_get_contents($tokenPath), true);
+                    $client->setAccessToken($accessToken);
+                }
+                
+                // If no valid token, authenticate
+                if ($client->isAccessTokenExpired()) {
+                    if ($client->getRefreshToken()) {
+                        $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                    } else {
+                        // Get auth URL
+                        $authUrl = $client->createAuthUrl();
+                        printf("Open this link in your browser:\n%s\n", $authUrl);
+                        print 'Enter verification code: ';
+                        $authCode = trim(fgets(STDIN));
+                
+                        // Exchange auth code for an access token
+                        $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
+                        $client->setAccessToken($accessToken);
+                
+                        // Save token
+                        if (!file_exists(dirname($tokenPath))) {
+                            mkdir(dirname($tokenPath), 0700, true);
+                        }
+                        file_put_contents($tokenPath, json_encode($client->getAccessToken()));
+                    }
+                }
+                
+                // Upload file to Google Drive (test_billshop_backup_db folder in ARB folder)
+                $service = new Google_Service_Drive($client);
+                
+                // Use the correct folder ID of the 'test_billshop_backup_db' inside 'ARB' folder
+                $fileMetadata = new Google_Service_Drive_DriveFile([
+                    'name' => 'backup_' . $timestamp . '.sql',
+                    'parents' => ['1IKo5jiNz39P04fZm5gNo64UzuGIMpT69'] // Replace this ID with your correct folder ID
+                ]);
+                
+                $content = file_get_contents($backupFile); // Your local backup file
+                
+                $file = $service->files->create($fileMetadata, [
+                    'data' => $content,
+                    'mimeType' => 'application/sql',
+                    'uploadType' => 'multipart',
+                    'fields' => 'id'
+                ]);
+                
+                printf("File ID: %s\n", $file->id);
+                echo "Backup also uploaded to Google Drive.\n";
+        ?>
+
+
+
+    Step 5: you have to create the credentials.json in your backups folder-> databases->credentials.json
+       // you can you downloaded credentials.json file and copy the json code and past here 
+
+
+            {
+    "web": {
+        "client_id": "77094584422-a9upm87tk6bek990ivgq811hvhhvd8fs.apps.googleusercontent.com",
+        "project_id": "marazin-project-backup-db",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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"
+    }
+}
+
+
+// above json is example code 
+
+
+
+
+
+
+        
+
   
 
 
