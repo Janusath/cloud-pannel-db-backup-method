@@ -224,13 +224,24 @@ How to backup the database from clodpannel
     you can find the folder id : 10MOC8QMNlLWUjgrdc72GelrtYQUQLT1h   
 
 
+    note: last work is you have to run the script.php file using putty 
+       eg:  php script.php
 
-* last work is you have to run the script.php file using putty 
-   eg:  php script.php
-* after run this "php script.php" command this token.json file will automaticly create in your backups folder-> databases-> token.json 
+ Step 5: after run the php script.php you will find the url link and copy this link past your browser
+
+        * Then, log in to your Google Account.
+        
+        * After logging in, you will receive a verification code.
+        
+        * You must copy that code and paste it into your terminal.
+
+        * after run this "php script.php" command this token.json file will automaticly create in your backups folder-> databases-> token.json 
 
 
-                 //everthing is finished successfully
+
+
+
+                                                //everthing is finished successfully
 
 
 
