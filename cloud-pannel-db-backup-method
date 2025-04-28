@@ -59,6 +59,8 @@ How to backup the database from clodpannel
 
 2 second method backup the database file into clodepannel server and google drive
 
+     * you have to change the permission of backups folder->databases->database name   0750 to 07770
+
   
 
 
